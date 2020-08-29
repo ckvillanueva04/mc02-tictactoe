@@ -145,7 +145,10 @@ const TicTacToe = ({ behavior }) => {
     }, 1000)
   }
 
-  const recursionGameTree = (s, p) => {
+  const recursionGameTree = (s, p, d) => {
+    if (d >= 6) {
+      return 0;
+    }
     if (checkResult(s)[1] === 'X') {
       return 1;
     }
@@ -163,7 +166,7 @@ const TicTacToe = ({ behavior }) => {
       curState = {...s};
       if (!curState[i]) {
         curState[i] = p;
-        total += recursionGameTree(curState, p === 'X' ? 'O' : 'X')
+        total += recursionGameTree(curState, p === 'X' ? 'O' : 'X', d+1)
       }
     }
 
@@ -179,7 +182,7 @@ const TicTacToe = ({ behavior }) => {
         curState[i] = bot;
         gameTree[i] = {
           nextMove: i,
-          utility: recursionGameTree(curState, player)
+          utility: recursionGameTree(curState, player, 1)
         }
       }
     }
