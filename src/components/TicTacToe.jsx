@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
-import { initGridState, checkResult } from '../helpers/constant';
+import { initGridState, checkResult } from '../helpers';
 import getRandomInt from '../helpers/getRandomInt'
 import robot from '../assets/robot.gif'
 import Typography from '@material-ui/core/Typography';
@@ -80,13 +80,14 @@ const TicTacToe = ({ behavior }) => {
   let history = useHistory();
   const init = Array.from(Array(9), (_, i) => i + 1);
   const [gridState, setGridState] = useState(initGridState)
-  const [player, setPlayer] = useState('X')
+  const [turn, setTurn] = useState('X')
   const [isHovered, setIsHovered] = useState(-1);
   const [remainingMoves, setRemainingMoves] = useState(init);
   const [bot] = useState(getRandomInt(1, 2) === 1 ? 'X' : 'O')
+  const [player] = useState(bot === 'O' ? 'X' : 'O')
 
-  const togglePlayer = () => {
-    setPlayer(prev => {
+  const toggleTurn = () => {
+    setTurn(prev => {
       if (prev === 'X') {
         return 'O'
       } else {
@@ -104,13 +105,13 @@ const TicTacToe = ({ behavior }) => {
   }
 
   const handleClick = (index) => {
-    if (bot !== player) {
+    if (bot !== turn) {
       removeMove(index);
       setGridState({
         ...gridState,
-        [index]: player,
+        [index]: turn,
       });
-      togglePlayer();
+      toggleTurn();
     }
   }
 
@@ -118,7 +119,7 @@ const TicTacToe = ({ behavior }) => {
     if (!!gridState[index]) {
       return <Marker hasMarker={!!gridState[index]}>{gridState[index]}</Marker>
     } else if (isHovered === index) {
-      return <Marker hasMarker={!!gridState[index]}>{player}</Marker>
+      return <Marker hasMarker={!!gridState[index]}>{turn}</Marker>
     }
   }
 
@@ -126,31 +127,104 @@ const TicTacToe = ({ behavior }) => {
     const [endGame, winner] = checkResult(gridState)
     if (endGame) {
       setTimeout(() => {
-        history.push(`/result/${winner}`);
+        history.push(`/result/${winner === bot ? 'bot' : 'player'}`);
       }, 500)
     }
   }, [gridState, history])
 
-  useEffect(() => {
-    if (player === bot) {
-      const n = remainingMoves.length;
-      const nextMove = getRandomInt(0, n-1)
-      setTimeout(() => {
-        setGridState({
-          ...gridState,
-          [remainingMoves[nextMove]]: player,
-        });
-        removeMove(remainingMoves[nextMove]);
-        togglePlayer();
-      }, 1000)
+  const random = () => {
+    const n = remainingMoves.length;
+    const nextMove = getRandomInt(0, n-1)
+    setTimeout(() => {
+      setGridState({
+        ...gridState,
+        [remainingMoves[nextMove]]: turn,
+      });
+      removeMove(remainingMoves[nextMove]);
+      toggleTurn();
+    }, 1000)
+  }
+
+  const recursionGameTree = (s, p) => {
+    if (checkResult(s)[1] === 'X') {
+      return 1;
     }
-  }, [player])
+    if (checkResult(s)[1] === 'draw') {
+      return 0;
+    }
+    if (checkResult(s)[1] === 'O') {
+      return -1;
+    }
+    
+    let curState;
+    let total = 0;
+
+    for(let i=1; i<=9; i+=1) {
+      curState = {...s};
+      if (!curState[i]) {
+        curState[i] = p;
+        total += recursionGameTree(curState, p === 'X' ? 'O' : 'X')
+      }
+    }
+
+    return total;
+  }
+
+  const createGameTree = () => {
+    let gameTree = []
+    let curState;
+    for(let i=1; i<=9; i+=1) {
+      curState = {...gridState};
+      if (!curState[i]) {
+        curState[i] = bot;
+        gameTree[i] = {
+          nextMove: i,
+          utility: recursionGameTree(curState, player)
+        }
+      }
+    }
+
+    let minmax;
+    if (bot === 'X') {
+      minmax = gameTree.sort((a, b) => b.utility - a.utility)[0]
+    } else {
+      minmax = gameTree.sort((a, b) => a.utility - b.utility)[0]
+    }
+
+    const decision = gameTree.filter(_ => _.utility === minmax.utility);
+    const n = decision.length
+    const r = getRandomInt(0, n-1)
+    console.log(gameTree, decision[r].nextMove)
+    return decision[r].nextMove
+  }
+
+  const miniMax = () => {
+    const nextMove = createGameTree();
+    setTimeout(() => {
+      setGridState({
+        ...gridState,
+        [nextMove]: turn,
+      });
+      removeMove(nextMove);
+      toggleTurn();
+    }, 1000)
+  }
+
+  useEffect(() => {
+    if (turn === bot) {
+      if (behavior === '0') {
+        random();
+      } else if (behavior === '1') {
+        miniMax();
+      }
+    }
+  }, [turn])
 
   return (
     <Container>
       <Card>
         <Typography variant="subtitle1" gutterBottom>
-          {bot === player ? `BOT'S TURN` : `YOUR TURN`}
+          {bot === turn ? `BOT'S TURN` : `YOUR TURN`}
         </Typography>
         <Robot src={robot}/>
         <GridContainer>

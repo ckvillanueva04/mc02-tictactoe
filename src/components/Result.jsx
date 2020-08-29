@@ -36,9 +36,11 @@ const StyledLink = styled(Link)`
 
 const Result = () => {
   const { winner } = useParams();
-  const message = winner !== 'draw' 
-    ? `PLAYER ${winner} WON!`
-    : `IT'S A DRAW!`
+  const message = winner === 'draw' 
+    ? `IT'S A DRAW!`
+    : winner === 'player'
+      ? `YOU WON`
+      : `YOU LOSE`
   return (
     <Container>
       <Card>
