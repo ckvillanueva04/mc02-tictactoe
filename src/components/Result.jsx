@@ -38,9 +38,8 @@ const Result = () => {
   const { winner } = useParams();
   const message = winner === 'draw' 
     ? `IT'S A DRAW!`
-    : winner === 'player'
-      ? `YOU WON`
-      : `YOU LOSE`
+    : `PLAYER ${winner} WON`
+    
   return (
     <Container>
       <Card>

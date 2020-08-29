@@ -127,7 +127,7 @@ const TicTacToe = ({ behavior }) => {
     const [endGame, winner] = checkResult(gridState)
     if (endGame) {
       setTimeout(() => {
-        history.push(`/result/${winner === bot ? 'bot' : 'player'}`);
+        history.push(`/result/${winner}`);
       }, 500)
     }
   }, [gridState, history])
