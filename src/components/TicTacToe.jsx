@@ -211,7 +211,7 @@ const TicTacToe = ({ behavior }) => {
   }
 
   useEffect(() => {
-    if (turn === bot) {
+    if (!checkResult(gridState)[0] && turn === bot) {
       if (behavior === '0') {
         random();
       } else if (behavior === '1') {
