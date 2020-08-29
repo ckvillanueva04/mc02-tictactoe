@@ -25,6 +25,10 @@ const Card = styled.div`
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
   transition: 0.3s;
 
+  h6 {
+    color: ${({ win }) => win ? 'green' : 'red'}
+  }
+
   &:hover {
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
   }
@@ -35,14 +39,16 @@ const StyledLink = styled(Link)`
 `
 
 const Result = () => {
-  const { winner } = useParams();
+  const { bot, winner } = useParams();
   const message = winner === 'draw' 
     ? `IT'S A DRAW!`
-    : `PLAYER ${winner} WON`
-    
+    : bot === winner 
+      ? 'YOU LOSE'
+      : 'YOU WON!'
+
   return (
     <Container>
-      <Card>
+      <Card win={bot !== winner}>
         <Typography variant="subtitle1" gutterBottom>
           {message}
         </Typography>

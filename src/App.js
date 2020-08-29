@@ -33,7 +33,7 @@ function App() {
         <NavBar>
           MC02 TIC TAC TOE
         </NavBar>
-        <Route path='/result/:winner'>
+        <Route path='/result/:bot/:winner'>
           <Result />
         </Route>
         <Route path='/tic-tac-toe'>

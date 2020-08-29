@@ -66,7 +66,7 @@ const Menu = ({ behavior, setBehavior }) => {
           >
             <MenuItem value='0'>0</MenuItem>
             <MenuItem value='1'>1</MenuItem>
-            {/* <MenuItem value='2'>2</MenuItem> */}
+            <MenuItem value='2'>2</MenuItem>
           </Select>
         </FormControl>
         <Link to='/tic-tac-toe'>

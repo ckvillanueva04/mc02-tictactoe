@@ -127,7 +127,7 @@ const TicTacToe = ({ behavior }) => {
     const [endGame, winner] = checkResult(gridState)
     if (endGame) {
       setTimeout(() => {
-        history.push(`/result/${winner}`);
+        history.push(`/result/${bot}/${winner}`);
       }, 500)
     }
   }, [gridState, history])
@@ -145,7 +145,7 @@ const TicTacToe = ({ behavior }) => {
     }, 1000)
   }
 
-  const recursionGameTree = (s, p, d) => {
+  const computeUtility = (s, p, d) => {
     if (d >= 6) {
       return 0;
     }
@@ -166,43 +166,45 @@ const TicTacToe = ({ behavior }) => {
       curState = {...s};
       if (!curState[i]) {
         curState[i] = p;
-        total += recursionGameTree(curState, p === 'X' ? 'O' : 'X', d+1)
+        total += computeUtility(curState, p === 'X' ? 'O' : 'X', d+1)
       }
     }
 
     return total;
   }
 
-  const createGameTree = () => {
-    let gameTree = []
+  const createDecisionTree = () => {
+    let decisionTree = []
     let curState;
     for(let i=1; i<=9; i+=1) {
       curState = {...gridState};
       if (!curState[i]) {
         curState[i] = bot;
-        gameTree[i] = {
+        decisionTree[i] = {
           nextMove: i,
-          utility: recursionGameTree(curState, player, 1)
+          utility: computeUtility(curState, player, 1)
         }
       }
     }
 
-    let minmax;
-    if (bot === 'X') {
-      minmax = gameTree.sort((a, b) => b.utility - a.utility)[0]
-    } else {
-      minmax = gameTree.sort((a, b) => a.utility - b.utility)[0]
-    }
-
-    const decision = gameTree.filter(_ => _.utility === minmax.utility);
-    const n = decision.length
-    const r = getRandomInt(0, n-1)
-    console.log(gameTree, decision[r].nextMove)
-    return decision[r].nextMove
+    return decisionTree
   }
 
   const miniMax = () => {
-    const nextMove = createGameTree();
+    const decisionTree = createDecisionTree();
+
+    const sortFn = bot === 'X' 
+      ? (a, b) => b.utility - a.utility
+      : (a, b) => a.utility - b.utility;
+
+    const minmax = decisionTree.sort(sortFn)[0];
+
+    const filteredDecisionTree = decisionTree.filter(_ => _.utility === minmax.utility);
+    const n = filteredDecisionTree.length;
+    const r = getRandomInt(0, n-1);
+    console.log(decisionTree, filteredDecisionTree[r].nextMove)
+    const nextMove = filteredDecisionTree[r].nextMove;
+    
     setTimeout(() => {
       setGridState({
         ...gridState,
@@ -219,6 +221,8 @@ const TicTacToe = ({ behavior }) => {
         random();
       } else if (behavior === '1') {
         miniMax();
+      } else if (behavior === '2') {
+
       }
     }
   }, [turn])
