@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
-import { initGridState, checkResult } from '../helpers';
+import { initGridState, checkResult, checkNextMove } from '../helpers';
 import getRandomInt from '../helpers/getRandomInt'
 import robot from '../assets/robot.gif'
 import Typography from '@material-ui/core/Typography';
@@ -190,7 +190,7 @@ const TicTacToe = ({ behavior }) => {
     return decisionTree
   }
 
-  const miniMax = () => {
+  const basicMiniMax = () => {
     const decisionTree = createDecisionTree();
 
     const sortFn = bot === 'X' 
@@ -215,14 +215,51 @@ const TicTacToe = ({ behavior }) => {
     }, 1000)
   }
 
+  const optimizedMiniMax = () => {
+    const attack = checkNextMove(gridState, bot);
+    const blockNextMove = checkNextMove(gridState, player);
+    let nextMove;
+
+    if (!blockNextMove && !attack) {
+      const decisionTree = createDecisionTree();
+
+      const sortFn = bot === 'X' 
+        ? (a, b) => b.utility - a.utility
+        : (a, b) => a.utility - b.utility;
+  
+      const minmax = decisionTree.sort(sortFn)[0];
+  
+      const filteredDecisionTree = decisionTree.filter(_ => _.utility === minmax.utility);
+      const n = filteredDecisionTree.length;
+      const r = getRandomInt(0, n-1);
+      console.log(decisionTree, filteredDecisionTree[r].nextMove)
+      nextMove = filteredDecisionTree[r].nextMove;
+    } else if (!!attack) {
+      console.log('attack', attack)
+      nextMove = attack;
+    } else {
+      console.log('block',blockNextMove)
+      nextMove = blockNextMove;
+    }
+    
+    setTimeout(() => {
+      setGridState({
+        ...gridState,
+        [nextMove]: turn,
+      });
+      removeMove(nextMove);
+      toggleTurn();
+    }, 1000)
+  }
+
   useEffect(() => {
     if (!checkResult(gridState)[0] && turn === bot) {
       if (behavior === '0') {
         random();
       } else if (behavior === '1') {
-        miniMax();
+        basicMiniMax();
       } else if (behavior === '2') {
-
+        optimizedMiniMax();
       }
     }
   }, [turn])

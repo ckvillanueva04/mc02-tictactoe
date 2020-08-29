@@ -26,7 +26,7 @@ const Card = styled.div`
   transition: 0.3s;
 
   h6 {
-    color: ${({ win }) => win ? 'green' : 'red'}
+    color: ${({ win, draw }) => draw ? 'black' : win ? 'green' : 'red'}
   }
 
   &:hover {
@@ -48,7 +48,7 @@ const Result = () => {
 
   return (
     <Container>
-      <Card win={bot !== winner}>
+      <Card win={bot !== winner} draw={winner === 'draw'}>
         <Typography variant="subtitle1" gutterBottom>
           {message}
         </Typography>
