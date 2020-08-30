@@ -139,7 +139,7 @@ const TicTacToe = ({ behavior }) => {
 
     if (!attack) {
       const n = remainingMoves.length;
-      nextMove = getRandomInt(0, n-1)
+      nextMove = remainingMoves[getRandomInt(0, n-1)];
     } else {
       console.log('attack', attack)
       nextMove = attack;    
@@ -148,7 +148,7 @@ const TicTacToe = ({ behavior }) => {
     setTimeout(() => {
       setGridState({
         ...gridState,
-        [remainingMoves[nextMove]]: turn,
+        [nextMove]: turn,
       });
       removeMove(remainingMoves[nextMove]);
       toggleTurn();
