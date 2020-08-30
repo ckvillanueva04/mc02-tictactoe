@@ -36,8 +36,8 @@ const Card = styled.div`
 `
 
 const GridContainer = styled.div`
-  height: 100%;
-  width: 100%;
+  height: 227px;
+  width: 227px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-gap: 1px;
