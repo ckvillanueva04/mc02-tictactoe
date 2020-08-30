@@ -36,7 +36,7 @@ function App() {
         <Route path='/result/:bot/:winner'>
           <Result />
         </Route>
-        <Route path='/tic-tac-toe'>
+        <Route path='/tic-tac-toe/:marker'>
           <TicTacToe behavior={behavior} />  
         </Route>
         <Switch>

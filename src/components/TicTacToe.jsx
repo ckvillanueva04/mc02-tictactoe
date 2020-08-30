@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useHistory } from "react-router-dom";
 import styled from 'styled-components';
 import Button from '@material-ui/core/Button';
@@ -18,7 +18,6 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-content: center;
   align-items: center;
   min-width: 200px;
   min-height: 165px;
@@ -35,22 +34,17 @@ const Card = styled.div`
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
   }
 `
-const template = `
-  "grid-1 grid-2 grid-3"
-  "grid-4 grid-5 grid-6"
-  "grid-7 grid-8 grid-9"
-`
+
 const GridContainer = styled.div`
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-areas: ${template};
+  grid-template-columns: repeat(3, 1fr);
   grid-gap: 1px;
 `
 
 const Grid = styled.div`
   display: grid;
-  grid-area: ${({ area }) => `grid-${area}`};
   background: ${({ hovered, hasMarker }) => hovered && !hasMarker ? '#e6e6e6' : '#DCDCDC'};
   height: 75px;
   width: 75px;
@@ -77,14 +71,21 @@ const Robot = styled.img`
 `
 
 const TicTacToe = ({ behavior }) => {
-  let history = useHistory();
+  const history = useHistory();
+  const { marker } = useParams();
   const init = Array.from(Array(9), (_, i) => i + 1);
   const [gridState, setGridState] = useState(initGridState)
   const [turn, setTurn] = useState('X')
   const [isHovered, setIsHovered] = useState(-1);
   const [remainingMoves, setRemainingMoves] = useState(init);
-  const [bot] = useState(getRandomInt(1, 2) === 1 ? 'X' : 'O')
+  const [bot] = useState(marker)
   const [player] = useState(bot === 'O' ? 'X' : 'O')
+
+  useEffect(() => {
+    if (!marker) {
+      history.push('/');
+    }
+  }, [history, marker])
 
   const toggleTurn = () => {
     setTurn(prev => {
@@ -133,8 +134,17 @@ const TicTacToe = ({ behavior }) => {
   }, [gridState, history])
 
   const random = () => {
-    const n = remainingMoves.length;
-    const nextMove = getRandomInt(0, n-1)
+    const attack = checkNextMove(gridState, bot);
+    let nextMove;
+
+    if (!attack) {
+      const n = remainingMoves.length;
+      nextMove = getRandomInt(0, n-1)
+    } else {
+      console.log('attack', attack)
+      nextMove = attack;    
+    }
+
     setTimeout(() => {
       setGridState({
         ...gridState,
@@ -268,14 +278,13 @@ const TicTacToe = ({ behavior }) => {
     <Container>
       <Card>
         <Typography variant="subtitle1" gutterBottom>
-          {bot === turn ? `BOT'S TURN` : `YOUR TURN`}
+          {bot === turn ? `BOT'S TURN (${bot})` : `YOUR TURN (${player})`}
         </Typography>
         <Robot src={robot}/>
         <GridContainer>
           {init.map(n => (
             <Grid 
               key={n} 
-              area={n} 
               onMouseEnter={() => setIsHovered(n)} 
               onMouseLeave={() => setIsHovered(-1)}
               hovered={isHovered === n}

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useHistory } from 'react-router-dom';
 
 import Typography from '@material-ui/core/Typography';
 import { Button } from '@material-ui/core';
@@ -39,6 +39,7 @@ const StyledLink = styled(Link)`
 `
 
 const Result = () => {
+  const history = useHistory();
   const { bot, winner } = useParams();
   const message = winner === 'draw' 
     ? `IT'S A DRAW!`
@@ -46,14 +47,23 @@ const Result = () => {
       ? 'YOU LOSE'
       : 'YOU WON!'
 
+  useEffect(() => {
+    if (!bot || !winner) {
+      history.push('/');
+    }
+  }, [history, bot, winner])
+
   return (
     <Container>
       <Card win={bot !== winner} draw={winner === 'draw'}>
         <Typography variant="subtitle1" gutterBottom>
           {message}
         </Typography>
+        <StyledLink to={`/tic-tac-toe/${bot === 'X' ? 'O' : 'X'}`}>
+          <Button variant="contained">play another game</Button>
+        </StyledLink> 
         <StyledLink to='/'>
-          <Button variant="contained">Back</Button>
+          <Button variant="contained">Back to menu</Button>
         </StyledLink> 
       </Card>
     </Container>

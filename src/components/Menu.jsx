@@ -9,6 +9,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import getRandomInt from '../helpers/getRandomInt';
 
 const Container = styled.div`
   display: flex;
@@ -69,7 +70,7 @@ const Menu = ({ behavior, setBehavior }) => {
             <MenuItem value='2'>2</MenuItem>
           </Select>
         </FormControl>
-        <Link to='/tic-tac-toe'>
+        <Link to={`/tic-tac-toe/${getRandomInt(1, 2) === 1 ? 'X' : 'O'}`}>
           <Button variant="contained">Start Tic-Tac-Toe</Button>
         </Link>
       </Card>
